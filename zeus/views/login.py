@@ -26,11 +26,15 @@ class SigninView(MethodView):
         display_form = DisplaySuccessForm(request.params)
         if not form.validate():
             return render_template(
-                'www/signin.html', error=u'用户不存在或者密码错误')
+                'www/signin.html', error=u'用户不存在或者密码错误',
+                display_form=display_form,
+            )
 
         if not display_form.validate():
             return render_template(
-                'www/signin.html', error=u'请求参数错误')
+                'www/signin.html', error=u'请求参数错误',
+                display_form=display_form,
+            )
 
         data = form.data
         success = display_form.data.get('success')
@@ -41,7 +45,9 @@ class SigninView(MethodView):
         ).first()
         if not account:
             return render_template(
-                'www/signin.html', error=u'用户不存在或者密码错误')
+                'www/signin.html', error=u'用户不存在或者密码错误',
+                display_form=display_form,
+            )
 
         request.session['ukey'] = account.ukey
         return redirect(success or url('apollo:www.main'))
@@ -63,7 +69,8 @@ class SignUpView(MethodView):
 
         if not display_form.validate():
             return render_template(
-                'www/signup.html', error=u'请求参数错误')
+                'www/signup.html', error=u'请求参数错误',
+                display_form=display_form)
 
         success = display_form.data.get('success')
 
@@ -71,7 +78,8 @@ class SignUpView(MethodView):
             account = AccountModel.create(**form.data)
             db.session.commit()
         except Exception as e:
-            return render_template('www/signup.html', error=e)
+            return render_template(
+                'www/signup.html', error=e, display_form=display_form)
 
         request.session['ukey'] = account.ukey
         backends.apollo.user.post(

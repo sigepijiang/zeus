@@ -1,6 +1,7 @@
 #-*- coding: utf-8 -*-
 from datetime import datetime
 
+import hashlib
 import sqlalchemy as sa
 
 from share.framework.bottle.engines import db
@@ -50,6 +51,7 @@ class EmailModel(db.Model, db.TableOpt):
     def create(cls, email, password_hash):
         # get_id(work_id, data_centor_id)
         new_ukey = to_python(get_id(1, 1))
+        password_hash = hashlib.md5(password_hash).hexdigest()
         email = EmailModel(
             ukey=new_ukey, email=email, password_hash=password_hash)
         return email

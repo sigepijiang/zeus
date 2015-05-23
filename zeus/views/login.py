@@ -65,7 +65,10 @@ class SignUpView(MethodView):
         form = SignUpForm(request.forms)
         display_form = DisplaySuccessForm(request.params)
         if not form.validate():
-            return render_template('www/signup.html')
+            return render_template(
+                'www/signup.html', error=u'请求参数错误',
+                display_form=display_form,
+            )
 
         if not display_form.validate():
             return render_template(
@@ -77,9 +80,11 @@ class SignUpView(MethodView):
         try:
             account = AccountModel.create(**form.data)
             db.session.commit()
-        except Exception as e:
+        except Exception:
             return render_template(
-                'www/signup.html', error=e, display_form=display_form)
+                'www/signup.html',
+                error=u'账号已经存在',
+                display_form=display_form)
 
         request.session['ukey'] = account.ukey
         backends.apollo.user.post(
